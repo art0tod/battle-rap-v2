@@ -1,10 +1,12 @@
 const dateTimeFormatter = new Intl.DateTimeFormat("ru-RU", {
   dateStyle: "medium",
   timeStyle: "short",
+  timeZone: "UTC",
 });
 
 const dateFormatter = new Intl.DateTimeFormat("ru-RU", {
   dateStyle: "medium",
+  timeZone: "UTC",
 });
 
 const numberFormatter = new Intl.NumberFormat("ru-RU");

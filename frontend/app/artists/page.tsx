@@ -16,14 +16,22 @@ const SORT_OPTIONS = [
 ];
 
 type PageProps = {
-  searchParams?: Record<string, string | string[] | undefined>;
+  searchParams?: Promise<Record<string, string | string[] | undefined>>;
 };
 
-export default async function ArtistsPage({ searchParams = {} }: PageProps) {
-  const page = Math.max(1, Number(searchParams.page ?? "1"));
-  const role = typeof searchParams.role === "string" ? searchParams.role : undefined;
-  const sort = typeof searchParams.sort === "string" ? searchParams.sort : undefined;
-  const search = typeof searchParams.search === "string" ? searchParams.search : undefined;
+const getSingleParam = (value?: string | string[]) => (Array.isArray(value) ? value[0] : value);
+
+export default async function ArtistsPage({ searchParams }: PageProps) {
+  const resolvedSearch = searchParams ? await searchParams : {};
+  const pageParam = getSingleParam(resolvedSearch.page);
+  const roleParam = getSingleParam(resolvedSearch.role);
+  const sortParam = getSingleParam(resolvedSearch.sort);
+  const searchParam = getSingleParam(resolvedSearch.search);
+  const parsedPage = Number.parseInt(pageParam ?? "1", 10);
+  const page = Number.isFinite(parsedPage) && parsedPage > 0 ? parsedPage : 1;
+  const role = roleParam || undefined;
+  const sort = sortParam || undefined;
+  const search = searchParam || undefined;
   const limit = 20;
 
   const response = await fetchArtists({ page, limit, role, sort, search });
@@ -65,7 +73,7 @@ export default async function ArtistsPage({ searchParams = {} }: PageProps) {
         page={response.page}
         limit={response.limit}
         total={response.total}
-        searchParams={searchParams}
+        searchParams={resolvedSearch}
       />
     </div>
   );

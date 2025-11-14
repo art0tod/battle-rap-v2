@@ -5,7 +5,7 @@ import { formatTournamentStatus } from "@/lib/labels";
 import { Pagination } from "@/components/pagination";
 
 type PageProps = {
-  searchParams?: Record<string, string | string[] | undefined>;
+  searchParams?: Promise<Record<string, string | string[] | undefined>>;
 };
 
 const STATUS_OPTIONS = [
@@ -16,9 +16,13 @@ const STATUS_OPTIONS = [
   { value: "archived", label: "Архив" },
 ];
 
-export default async function TournamentsPage({ searchParams = {} }: PageProps) {
-  const page = Math.max(1, Number(searchParams.page ?? "1"));
-  const statusParam = typeof searchParams.status === "string" ? searchParams.status : undefined;
+export default async function TournamentsPage({ searchParams }: PageProps) {
+  const resolvedSearch = searchParams ? await searchParams : {};
+  const pageParam = Array.isArray(resolvedSearch.page) ? resolvedSearch.page[0] : resolvedSearch.page;
+  const statusParamRaw = Array.isArray(resolvedSearch.status) ? resolvedSearch.status[0] : resolvedSearch.status;
+  const parsedPage = Number.parseInt(pageParam ?? "1", 10);
+  const page = Number.isFinite(parsedPage) && parsedPage > 0 ? parsedPage : 1;
+  const statusParam = statusParamRaw || undefined;
   const response = await fetchTournaments({ page, status: statusParam, limit: 10 });
 
   return (
@@ -75,7 +79,7 @@ export default async function TournamentsPage({ searchParams = {} }: PageProps) 
         page={response.page}
         limit={response.limit}
         total={response.total}
-        searchParams={searchParams}
+        searchParams={resolvedSearch}
       />
     </div>
   );

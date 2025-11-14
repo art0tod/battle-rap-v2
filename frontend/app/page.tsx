@@ -10,6 +10,8 @@ import {
 import { formatDateTime, formatNumber } from "@/lib/format";
 import { formatRoundStatus, formatTournamentStatus } from "@/lib/labels";
 
+export const dynamic = "force-dynamic";
+
 export default function HomePage() {
   return (
     <div>

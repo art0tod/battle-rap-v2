@@ -4,6 +4,7 @@ import type {
   AdminBattle,
   AdminOverview,
   AdminTournament,
+  ApplicationAdmin,
   ApplicationRecord,
   BattleDetail,
   BattleTracksResponse,
@@ -16,6 +17,8 @@ import type {
   MediaPresignResponse,
   PaginatedResponse,
   ParticipantSummary,
+  ProfileHighlights,
+  ProfileView,
   PublicBattle,
   RoundDetailResponse,
   RoundOverviewResponse,
@@ -280,3 +283,62 @@ export const searchJudgeBattles = async (token: string, query: string, limit = 1
       },
     }
   );
+
+export const fetchApplicationsModeration = async (
+  token: string,
+  params?: { status?: string; limit?: number }
+) =>
+  apiFetch<ApplicationAdmin[]>(withQuery("/mod/applications", params), {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+
+export const fetchApplicationDetail = async (token: string, id: string) =>
+  apiFetch<ApplicationAdmin>(`/mod/applications/${id}`, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+
+export const approveApplication = async (token: string, id: string) =>
+  apiFetch(`/mod/applications/${id}/approve`, {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+
+export const rejectApplication = async (token: string, id: string, reason: string) =>
+  apiFetch(`/mod/applications/${id}/reject`, {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${token}`,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ reason }),
+  });
+
+export const submitChallengeResponseRequest = async (
+  token: string,
+  challengeId: string,
+  payload: { audio_id: string; description?: string }
+) =>
+  apiFetch<Challenge>(`/challenges/${challengeId}/responses`, {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${token}`,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(payload),
+  });
+
+export const fetchProfile = async (id: string) =>
+  apiFetch<ProfileView>(`/profile/${id}`, {
+    next: { revalidate: 60 },
+  });
+
+export const fetchProfileHighlights = async (id: string) =>
+  apiFetch<ProfileHighlights>(`/profile/${id}/highlights`, {
+    next: { revalidate: 120 },
+  });

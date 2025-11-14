@@ -44,6 +44,52 @@ export type ProfileView = {
   socials?: Record<string, unknown>;
 };
 
+export type ProfileBattleParticipant = {
+  user_id: string;
+  display_name: string;
+  avatar_url: string | null;
+  is_self: boolean;
+  seed: number | null;
+};
+
+export type ProfileBattleSummary = {
+  id: string;
+  status: string;
+  starts_at: string | null;
+  ends_at: string | null;
+  round: {
+    id: string;
+    number: number;
+    kind: string;
+    status: string;
+  };
+  tournament: {
+    id: string;
+    title: string;
+  };
+  participants: ProfileBattleParticipant[];
+};
+
+export type ProfileBattleResult = "win" | "loss" | "draw" | "pending";
+
+export type ProfileParticipantBattle = ProfileBattleSummary & {
+  result: ProfileBattleResult;
+};
+
+export type ProfileJudgedBattle = ProfileBattleSummary & {
+  evaluated_at: string;
+};
+
+export type ProfileHighlights = {
+  stats: {
+    wins: number;
+    losses: number;
+    slivs: number;
+  };
+  participated_battles: ProfileParticipantBattle[];
+  judged_battles: ProfileJudgedBattle[];
+};
+
 export type TournamentSummary = {
   id: string;
   title: string;
@@ -251,7 +297,33 @@ export type ApplicationRecord = {
   created_at: string;
 };
 
+export type ApplicationAdmin = {
+  id: string;
+  user_id: string;
+  round_id: string;
+  status: string;
+  city: string | null;
+  age: number | null;
+  vk_id: string | null;
+  full_name: string | null;
+  beat_author: string | null;
+  audio_id: string | null;
+  lyrics?: string | null;
+  created_at: string;
+  updated_at?: string;
+  display_name?: string;
+  email?: string;
+};
+
 export type ChallengeStatus = "initiated" | "in_progress" | "completed" | "cancelled";
+
+export type ChallengeResponse = {
+  user_id: string;
+  audio_id: string;
+  audio_url: string | null;
+  description: string | null;
+  submitted_at: string;
+};
 
 export type Challenge = {
   id: string;
@@ -277,6 +349,10 @@ export type Challenge = {
   votes: {
     initiator: number;
     opponent: number;
+  };
+  responses?: {
+    initiator: ChallengeResponse | null;
+    opponent: ChallengeResponse | null;
   };
 };
 

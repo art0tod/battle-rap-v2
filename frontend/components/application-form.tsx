@@ -80,9 +80,14 @@ export const ApplicationForm = ({ round }: ApplicationFormProps) => {
 
     try {
       let audioId = existing?.audio_id ?? null;
+      let lyricsWithAudio = lyrics;
       if (file) {
         const upload = await uploadAudioFile(file, token);
         audioId = upload.id;
+        if (upload.url) {
+          const note = `Audio: ${upload.url}`;
+          lyricsWithAudio = lyrics ? `${lyrics.trim()}\n${note}` : note;
+        }
       }
       if (!audioId) {
         setError("Загрузите трек перед отправкой заявки");
@@ -96,7 +101,7 @@ export const ApplicationForm = ({ round }: ApplicationFormProps) => {
         fullName: fullName || undefined,
         beatAuthor: beatAuthor || undefined,
         audioId,
-        lyrics: lyrics || undefined,
+        lyrics: lyricsWithAudio || undefined,
       });
       setExisting(response as ApplicationRecord);
       setSuccess("Заявка отправлена. Статус: " + (response as { status?: string })?.status);

@@ -8,6 +8,7 @@ import {
   completeChallenge,
   voteChallenge,
   getChallengeById,
+  submitChallengeResponse,
 } from '../services/challenges.js';
 import { AppError } from '../lib/errors.js';
 
@@ -61,6 +62,22 @@ const challengesRoutes: FastifyPluginAsync = async (fastify) => {
     const params = z.object({ id: z.string().uuid() }).parse(request.params);
     const body = z.object({ side: z.enum(['initiator', 'opponent']) }).parse(request.body);
     return voteChallenge({ challengeId: params.id, userId: request.authUser!.id, side: body.side });
+  });
+
+  fastify.post('/:id/responses', { preHandler: fastify.requireAuth }, async (request) => {
+    const params = z.object({ id: z.string().uuid() }).parse(request.params);
+    const body = z
+      .object({
+        audio_id: z.string().uuid(),
+        description: z.string().max(2000).optional(),
+      })
+      .parse(request.body);
+    return submitChallengeResponse({
+      challengeId: params.id,
+      userId: request.authUser!.id,
+      audioId: body.audio_id,
+      description: body.description,
+    });
   });
 };
 

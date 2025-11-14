@@ -38,11 +38,47 @@ const loadBattle = async (id: string) => {
   }
 };
 
-export default async function BattlePage({ params }: { params: { id: string } }) {
-  if (!isUuid(params.id)) {
+type BattlePageProps = {
+  params: Promise<{ id: string }>;
+};
+
+export default async function BattlePage({ params }: BattlePageProps) {
+  const { id } = await params;
+  if (!isUuid(id)) {
     notFound();
   }
-  const { battle, tracks, participants } = await loadBattle(params.id);
+  const { battle, tracks, participants } = await loadBattle(id);
+  const trackMap = new Map(tracks.tracks.map((track) => [track.participant_id, track]));
+  const mergedParticipants = (() => {
+    const baseList = participants.length
+      ? participants
+      : tracks.tracks.map((track) => ({
+          participant_id: track.participant_id,
+          display_name: track.participant_id,
+          result_status: null,
+          avg_total_score: track.avg_total,
+        }));
+    const seen = new Set<string>();
+    const list = baseList.map((participant) => {
+      seen.add(participant.participant_id);
+      return {
+        ...participant,
+        track: trackMap.get(participant.participant_id) ?? null,
+      };
+    });
+    tracks.tracks.forEach((track) => {
+      if (!seen.has(track.participant_id)) {
+        list.push({
+          participant_id: track.participant_id,
+          display_name: track.participant_id,
+          result_status: null,
+          avg_total_score: track.avg_total,
+          track,
+        });
+      }
+    });
+    return list;
+  })();
 
   return (
     <div>
@@ -54,7 +90,7 @@ export default async function BattlePage({ params }: { params: { id: string } })
         <li>Комментарии: {battle.engagement.comments}</li>
         <li>Победный трек: {battle.winner_match_track_id ?? "—"}</li>
       </ul>
-      {participants.length ? (
+      {mergedParticipants.length ? (
         <section>
           <h3>Участники</h3>
           <table>
@@ -63,14 +99,28 @@ export default async function BattlePage({ params }: { params: { id: string } })
                 <th>Имя</th>
                 <th>Статус</th>
                 <th>Средний балл</th>
+                <th>Трек</th>
               </tr>
             </thead>
             <tbody>
-              {participants.map((participant) => (
+              {mergedParticipants.map((participant) => (
                 <tr key={participant.participant_id}>
                   <td>{participant.display_name ?? participant.participant_id}</td>
                   <td>{participant.result_status ?? "—"}</td>
                   <td>{formatNumber(participant.avg_total_score)}</td>
+                  <td>
+                    {participant.track?.audio_url ? (
+                      <div>
+                        <audio controls src={participant.track.audio_url}>
+                          Ваш браузер не поддерживает аудио тег.
+                        </audio>
+                        <p>Загружено: {formatDateTime(participant.track.submitted_at)}</p>
+                        <p>Длительность: {formatDuration(participant.track.duration_sec)}</p>
+                      </div>
+                    ) : (
+                      <span>Трек не загружен</span>
+                    )}
+                  </td>
                 </tr>
               ))}
             </tbody>

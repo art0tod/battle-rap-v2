@@ -3,12 +3,34 @@
 import { useCallback, useEffect, useState } from "react";
 import { useAuth } from "@/context/auth-context";
 import { apiFetch, ApiError } from "@/lib/api";
-import { createAdminRound, fetchAdminBattles, fetchAdminOverview, fetchAdminTournaments } from "@/lib/data";
-import { formatDateTime } from "@/lib/format";
+import {
+  createAdminRound,
+  fetchAdminBattles,
+  fetchAdminOverview,
+  fetchAdminTournaments,
+  fetchRoundOverview,
+  fetchApplicationsModeration,
+  fetchApplicationDetail,
+  approveApplication,
+  rejectApplication,
+  fetchTournamentDetail,
+} from "@/lib/data";
+import { fetchAdminUsers, updateUserRole } from "@/lib/admin";
+import { formatDateTime, formatNumber } from "@/lib/format";
 import { formatMatchStatus, formatRoundStatus, formatTournamentStatus } from "@/lib/labels";
-import type { AdminBattle, AdminOverview, AdminTournament } from "@/lib/types";
+import type {
+  AdminBattle,
+  AdminOverview,
+  AdminTournament,
+  ApplicationAdmin,
+  RoundOverviewResponse,
+  RoundSummary,
+} from "@/lib/types";
+import type { AdminUserSummary } from "@/lib/admin";
 
 const TOURNAMENT_STATUS_OPTIONS = ["draft", "registration", "ongoing", "completed", "archived"];
+const USER_ROLE_OPTIONS = ["admin", "moderator", "judge", "artist", "listener"] as const;
+type ApplicationItem = ApplicationAdmin & { audio_url?: string | null };
 
 export default function AdminPage() {
   const { user, token } = useAuth();
@@ -19,6 +41,20 @@ export default function AdminPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [info, setInfo] = useState<string | null>(null);
+  const [selectedTournamentId, setSelectedTournamentId] = useState("");
+  const [rounds, setRounds] = useState<RoundSummary[]>([]);
+  const [selectedRoundId, setSelectedRoundId] = useState("");
+  const [roundOverview, setRoundOverview] = useState<RoundOverviewResponse | null>(null);
+  const [roundOverviewLoading, setRoundOverviewLoading] = useState(false);
+  const [users, setUsers] = useState<AdminUserSummary[]>([]);
+  const [userPage, setUserPage] = useState(1);
+  const [userTotal, setUserTotal] = useState(0);
+  const [userLimit, setUserLimit] = useState(20);
+  const [userSearch, setUserSearch] = useState("");
+  const [userRoleFilter, setUserRoleFilter] = useState("");
+  const [applications, setApplications] = useState<ApplicationItem[]>([]);
+  const [applicationsLoading, setApplicationsLoading] = useState(false);
+  const [applicationReasons, setApplicationReasons] = useState<Record<string, string>>({});
   const [roundForm, setRoundForm] = useState({
     tournamentId: "",
     kind: "qualifier1",
@@ -64,6 +100,115 @@ export default function AdminPage() {
       loadAdminData();
     }
   }, [isAdmin, loadAdminData]);
+
+  useEffect(() => {
+    if (tournaments.length && !selectedTournamentId) {
+      setSelectedTournamentId(tournaments[0].id);
+    }
+  }, [tournaments, selectedTournamentId]);
+
+  useEffect(() => {
+    const loadRounds = async () => {
+      if (!selectedTournamentId) {
+        setRounds([]);
+        setSelectedRoundId("");
+        setRoundOverview(null);
+        return;
+      }
+      try {
+        const detail = await fetchTournamentDetail(selectedTournamentId);
+        setRounds(detail.rounds);
+        if (!detail.rounds.find((round) => round.id === selectedRoundId)) {
+          setSelectedRoundId(detail.rounds[0]?.id ?? "");
+        }
+      } catch (err) {
+        setError(err instanceof Error ? err.message : "Не удалось загрузить раунды");
+      }
+    };
+    loadRounds();
+  }, [selectedTournamentId, selectedRoundId]);
+
+  useEffect(() => {
+    const loadOverview = async () => {
+      if (!selectedRoundId) {
+        setRoundOverview(null);
+        return;
+      }
+      try {
+        setRoundOverviewLoading(true);
+        const overviewData = await fetchRoundOverview(selectedRoundId);
+        setRoundOverview(overviewData);
+      } catch (err) {
+        setError(err instanceof Error ? err.message : "Не удалось загрузить данные раунда");
+      } finally {
+        setRoundOverviewLoading(false);
+      }
+    };
+    loadOverview();
+  }, [selectedRoundId]);
+
+  const loadUsers = useCallback(
+    async (page: number) => {
+      if (!token) {
+        return;
+      }
+      try {
+        const response = await fetchAdminUsers(token, {
+          page,
+          limit: userLimit,
+          search: userSearch || undefined,
+          role: userRoleFilter || undefined,
+          sort: "-created_at",
+        });
+        setUsers(response.data);
+        setUserPage(response.page);
+        setUserTotal(response.total);
+        setUserLimit(response.limit);
+      } catch (err) {
+        setError(err instanceof Error ? err.message : "Не удалось загрузить пользователей");
+      }
+    },
+    [token, userLimit, userSearch, userRoleFilter],
+  );
+
+  useEffect(() => {
+    if (isAdmin) {
+      loadUsers(1);
+    }
+  }, [isAdmin, loadUsers]);
+
+  const loadApplications = useCallback(
+    async (roundId?: string) => {
+      if (!token) {
+        return;
+      }
+      setApplicationsLoading(true);
+      try {
+        const list = await fetchApplicationsModeration(token, { status: "submitted", limit: 50 });
+        const filtered = roundId ? list.filter((app) => app.round_id === roundId) : list;
+        const detailed = await Promise.all(
+          filtered.map(async (app) => {
+            const detail = await fetchApplicationDetail(token, app.id).catch(() => null);
+            const merged = detail ?? app;
+            const audioUrl = extractAudioFromText(merged.lyrics);
+            return { ...merged, audio_url: audioUrl } as ApplicationItem;
+          }),
+        );
+        setApplications(detailed);
+      } catch (err) {
+        setError(err instanceof Error ? err.message : "Не удалось загрузить заявки");
+      } finally {
+        setApplicationsLoading(false);
+      }
+    },
+    [token],
+  );
+
+  useEffect(() => {
+    if (isAdmin) {
+      loadApplications(selectedRoundId);
+    }
+  }, [isAdmin, selectedRoundId, loadApplications]);
 
   const requireAdmin = () => {
     if (!token) {
@@ -136,6 +281,55 @@ export default function AdminPage() {
       await loadAdminData();
     } catch (err) {
       setError(err instanceof Error ? err.message : "Не удалось создать раунд");
+    }
+  };
+
+  const handleRoleToggle = async (targetUserId: string, role: (typeof USER_ROLE_OPTIONS)[number]) => {
+    if (!requireAdmin()) {
+      return;
+    }
+    try {
+      const current = users.find((item) => item.id === targetUserId);
+      if (!current) {
+        return;
+      }
+      const hasRole = current.roles.includes(role);
+      const response = await updateUserRole(token!, targetUserId, role, hasRole ? "revoke" : "grant");
+      setUsers((prev) =>
+        prev.map((item) => (item.id === targetUserId ? { ...item, roles: response.roles } : item)),
+      );
+      setInfo(`Роли пользователя ${current.display_name} обновлены.`);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Не удалось изменить роль");
+    }
+  };
+
+  const handleApproveApplication = async (applicationId: string) => {
+    if (!requireAdmin()) {
+      return;
+    }
+    try {
+      await approveApplication(token!, applicationId);
+      setInfo("Заявка одобрена.");
+      await loadApplications();
+      setApplicationReasons((prev) => ({ ...prev, [applicationId]: "" }));
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Не удалось одобрить заявку");
+    }
+  };
+
+  const handleRejectApplication = async (applicationId: string) => {
+    if (!requireAdmin()) {
+      return;
+    }
+    const reason = applicationReasons[applicationId]?.trim() || "Не подходит для текущего этапа";
+    try {
+      await rejectApplication(token!, applicationId, reason);
+      setInfo("Заявка отклонена.");
+      await loadApplications();
+      setApplicationReasons((prev) => ({ ...prev, [applicationId]: "" }));
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Не удалось отклонить заявку");
     }
   };
 
@@ -221,6 +415,223 @@ export default function AdminPage() {
         ) : (
           <p>Турниры не найдены.</p>
         )}
+      </section>
+      <section>
+        <h3>Раунды и участники</h3>
+        {rounds.length ? (
+          <div>
+            <label>
+              Турнир
+              <select value={selectedTournamentId} onChange={(event) => setSelectedTournamentId(event.target.value)}>
+                {tournaments.map((tournament) => (
+                  <option key={tournament.id} value={tournament.id}>
+                    {tournament.title}
+                  </option>
+                ))}
+              </select>
+            </label>
+            <label>
+              Раунд
+              <select value={selectedRoundId} onChange={(event) => setSelectedRoundId(event.target.value)}>
+                {rounds.map((round) => (
+                  <option key={round.id} value={round.id}>
+                    #{round.number} ({round.kind}) — {formatRoundStatus(round.status)}
+                  </option>
+                ))}
+              </select>
+            </label>
+            {roundOverviewLoading ? (
+              <p>Загружаем данные раунда...</p>
+            ) : roundOverview ? (
+              <div>
+                <p>
+                  Баттлов {roundOverview.summary?.total_matches ?? 0}, треков {roundOverview.summary?.total_tracks ?? 0}, отзывов{" "}
+                  {roundOverview.summary?.total_reviews ?? 0}
+                </p>
+                {roundOverview.matches?.length ? (
+                  roundOverview.matches.map((match) => (
+                    <article key={match.id}>
+                      <h4>
+                        Баттл {match.id} — {formatMatchStatus(match.status)}
+                      </h4>
+                    {match.participants.length ? (
+                      <table>
+                        <thead>
+                          <tr>
+                            <th>Участник</th>
+                            <th>Результат</th>
+                            <th>Баллы</th>
+                            <th>Трек</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {match.participants.map((participant) => (
+                            <tr key={participant.participant_id}>
+                              <td>{participant.display_name}</td>
+                              <td>{participant.result_status ?? "—"}</td>
+                              <td>{formatNumber(participant.avg_total_score)}</td>
+                              <td>
+                                {participant.track?.audio_url ? (
+                                  <audio controls src={participant.track.audio_url}>
+                                    Браузер не поддерживает аудио.
+                                  </audio>
+                                ) : (
+                                  "Нет трека"
+                                )}
+                              </td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    ) : (
+                      <p>Участники отсутствуют.</p>
+                    )}
+                  </article>
+                  ))
+                ) : (
+                  <p>Нет баттлов в этом раунде.</p>
+                )}
+                <div>
+                  <h4>Заявки на участие</h4>
+                  {applicationsLoading ? (
+                    <p>Загружаем заявки...</p>
+                  ) : applications.length ? (
+                    <table>
+                      <thead>
+                        <tr>
+                          <th>Участник</th>
+                          <th>Город</th>
+                          <th>Дата</th>
+                          <th>Аудио</th>
+                          <th>Решение</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {applications.map((application) => (
+                          <tr key={application.id}>
+                            <td>{application.display_name ?? application.full_name ?? application.user_id}</td>
+                            <td>{application.city ?? "—"}</td>
+                            <td>{formatDateTime(application.created_at)}</td>
+                            <td>
+                              {application.audio_url ? (
+                                <audio controls src={application.audio_url}>
+                                  Браузер не поддерживает аудио.
+                                </audio>
+                              ) : (
+                                application.audio_id ?? "Нет файла"
+                              )}
+                            </td>
+                            <td>
+                              <button type="button" onClick={() => handleApproveApplication(application.id)}>
+                                Допустить
+                              </button>
+                              <div>
+                                <input
+                                  type="text"
+                                  placeholder="Причина отказа"
+                                  value={applicationReasons[application.id] ?? ""}
+                                  onChange={(event) =>
+                                    setApplicationReasons((prev) => ({ ...prev, [application.id]: event.target.value }))
+                                  }
+                                />
+                                <button type="button" onClick={() => handleRejectApplication(application.id)}>
+                                  Отклонить
+                                </button>
+                              </div>
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  ) : (
+                    <p>Нет заявок для этого раунда.</p>
+                  )}
+                </div>
+              </div>
+            ) : (
+              <p>Выберите раунд, чтобы увидеть его участников.</p>
+            )}
+          </div>
+        ) : (
+          <p>Для выбранного турнира нет раундов.</p>
+        )}
+      </section>
+      <section>
+        <h3>Пользователи и роли</h3>
+        <form
+          onSubmit={(event) => {
+            event.preventDefault();
+            loadUsers(1);
+          }}
+        >
+          <label>
+            Поиск
+            <input value={userSearch} onChange={(event) => setUserSearch(event.target.value)} placeholder="Имя или email" />
+          </label>
+          <label>
+            Роль
+            <select value={userRoleFilter} onChange={(event) => setUserRoleFilter(event.target.value)}>
+              <option value="">Все</option>
+              {USER_ROLE_OPTIONS.map((role) => (
+                <option key={role} value={role}>
+                  {role}
+                </option>
+              ))}
+            </select>
+          </label>
+          <button type="submit">Применить</button>
+        </form>
+        {users.length ? (
+          <table>
+            <thead>
+              <tr>
+                <th>Имя</th>
+                <th>Email</th>
+                <th>Создан</th>
+                {USER_ROLE_OPTIONS.map((role) => (
+                  <th key={role}>{role}</th>
+                ))}
+              </tr>
+            </thead>
+            <tbody>
+              {users.map((item) => (
+                <tr key={item.id}>
+                  <td>{item.display_name}</td>
+                  <td>{item.email}</td>
+                  <td>{formatDateTime(item.created_at)}</td>
+                  {USER_ROLE_OPTIONS.map((role) => (
+                    <td key={role}>
+                      <label>
+                        <input
+                          type="checkbox"
+                          checked={item.roles.includes(role)}
+                          onChange={() => handleRoleToggle(item.id, role)}
+                        />
+                      </label>
+                    </td>
+                  ))}
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        ) : (
+          <p>Нет пользователей для отображения.</p>
+        )}
+        <div>
+          <button type="button" disabled={userPage <= 1} onClick={() => loadUsers(userPage - 1)}>
+            Предыдущая
+          </button>
+          <span>
+            Страница {userPage} из {Math.max(1, Math.ceil(userTotal / userLimit))}
+          </span>
+          <button
+            type="button"
+            disabled={userPage >= Math.ceil(userTotal / userLimit)}
+            onClick={() => loadUsers(userPage + 1)}
+          >
+            Следующая
+          </button>
+        </div>
       </section>
       <section>
         <h3>Создать раунд</h3>
@@ -342,4 +753,12 @@ export default function AdminPage() {
       </section>
     </div>
   );
+}
+
+function extractAudioFromText(text?: string | null) {
+  if (!text) {
+    return null;
+  }
+  const match = text.match(/https?:\/\/\S+/);
+  return match ? match[0] : null;
 }

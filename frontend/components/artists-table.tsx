@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useMemo } from "react";
 import type { ParticipantSummary } from "@/lib/types";
 import { ChallengeButton } from "@/components/challenge-button";
@@ -32,7 +33,9 @@ export const ArtistsTable = ({ participants }: { participants: ParticipantSummar
       <tbody>
         {rows.map((participant) => (
           <tr key={participant.id}>
-            <td>{participant.display_name}</td>
+            <td>
+              <Link href={`/profile/${participant.id}`}>{participant.display_name}</Link>
+            </td>
             <td>{participant.roles.join(", ") || "—"}</td>
             <td>{participant.city ?? "—"}</td>
             <td>{formatNumber(participant.total_wins)}</td>

@@ -1,6 +1,15 @@
 import { completeMediaUpload, requestMediaPresign } from "@/lib/data";
 
-export const uploadAudioFile = async (file: File, token: string) => {
+const MEDIA_BASE_URL = (process.env.NEXT_PUBLIC_MEDIA_BASE_URL ?? "").replace(/\/$/, "");
+
+export type UploadAudioResult = {
+  id: string;
+  status: string;
+  storageKey: string;
+  url: string | null;
+};
+
+export const uploadAudioFile = async (file: File, token: string): Promise<UploadAudioResult> => {
   const mime = file.type || "audio/mpeg";
   const presign = await requestMediaPresign(token, {
     filename: file.name,
@@ -23,5 +32,12 @@ export const uploadAudioFile = async (file: File, token: string) => {
     kind: "audio",
   });
 
-  return asset;
+  const url = MEDIA_BASE_URL ? `${MEDIA_BASE_URL}/${presign.storageKey}` : null;
+
+  return {
+    id: asset.id,
+    status: asset.status,
+    storageKey: presign.storageKey,
+    url,
+  };
 };
