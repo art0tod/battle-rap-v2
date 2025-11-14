@@ -2,6 +2,7 @@ import { randomUUID } from 'node:crypto';
 import { pool, tx, type DbClient } from '../db/pool.js';
 import { AppError, mapDbError } from '../lib/errors.js';
 import { resolveCdnUrl } from './media.js';
+import { CHALLENGE_TOURNAMENT_ID } from '../lib/constants.js';
 
 type ChallengeRow = {
   id: string;
@@ -55,8 +56,6 @@ const baseSelect = `
   JOIN app_user initiator ON initiator.id = c.initiator_id
   JOIN app_user opponent ON opponent.id = c.opponent_id
 `;
-
-const CHALLENGE_TOURNAMENT_ID = '00000000-0000-4000-8000-00000000cafe';
 
 const toChallengeResponse = (row: ChallengeResponseRow) => ({
   user_id: row.user_id,

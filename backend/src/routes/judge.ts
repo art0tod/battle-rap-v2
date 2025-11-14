@@ -5,6 +5,7 @@ import {
   assignSpecificBattleToJudge,
   getJudgeBattleDetails,
   getMatchRound,
+  listAvailableJudgeBattles,
   listJudgeAssignments,
   listJudgeHistory,
   searchJudgeBattles,
@@ -91,6 +92,11 @@ const judgeRoutes: FastifyPluginAsync = async (fastify) => {
 
   fastify.get('/history', { preHandler: [fastify.requireAuth, requireJudge] }, async (request) => {
     return listJudgeHistory(request.authUser!.id);
+  });
+
+  fastify.get('/battles/available', { preHandler: [fastify.requireAuth, requireJudge] }, async (request) => {
+    const query = z.object({ limit: z.coerce.number().int().min(1).max(50).optional() }).parse(request.query);
+    return listAvailableJudgeBattles(request.authUser!.id, query.limit ?? 20);
   });
 
   fastify.get('/battles/search', { preHandler: [fastify.requireAuth, requireJudge] }, async (request) => {

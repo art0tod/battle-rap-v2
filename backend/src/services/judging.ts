@@ -1,6 +1,7 @@
 import { pool } from '../db/pool.js';
 import { AppError, mapDbError } from '../lib/errors.js';
 import { resolveCdnUrl } from './media.js';
+import { CHALLENGE_TOURNAMENT_ID } from '../lib/constants.js';
 
 export type EvaluationPayload = {
   judgeId: string;
@@ -156,6 +157,46 @@ export const assignNextBattleToJudge = async (judgeId: string) => {
   return rows[0] ?? null;
 };
 
+export const listAvailableJudgeBattles = async (judgeId: string, limit = 20) => {
+  const { rows } = await pool.query(
+    `SELECT
+        m.id AS match_id,
+        m.status AS match_status,
+        m.starts_at,
+        r.id AS round_id,
+        r.number AS round_number,
+        r.kind AS round_kind,
+        r.status AS round_status,
+        t.id AS tournament_id,
+        t.title AS tournament_title
+     FROM match m
+     JOIN round r ON r.id = m.round_id
+     JOIN tournament t ON t.id = r.tournament_id
+     WHERE r.status = 'judging'
+       AND (r.judging_deadline_at IS NULL OR r.judging_deadline_at > now())
+       AND m.status NOT IN ('finished','tie')
+       AND EXISTS (
+         SELECT 1 FROM match_track mt WHERE mt.match_id = m.id
+       )
+       AND EXISTS (
+         SELECT 1 FROM tournament_judge tj
+         WHERE tj.tournament_id = r.tournament_id AND tj.user_id = $1
+       )
+       AND NOT EXISTS (
+         SELECT 1 FROM judge_assignment ja
+         WHERE ja.judge_id = $1 AND ja.match_id = m.id
+       )
+       AND NOT EXISTS (
+         SELECT 1 FROM evaluation e
+         WHERE e.judge_id = $1 AND e.target_type = 'match' AND e.target_id = m.id
+       )
+     ORDER BY r.number ASC, m.starts_at NULLS FIRST, m.id
+     LIMIT $2`,
+    [judgeId, limit],
+  );
+  return rows;
+};
+
 export const updateJudgeAssignmentStatus = async (params: {
   assignmentId: string;
   judgeId: string;
@@ -273,18 +314,21 @@ export const assignSpecificBattleToJudge = async (judgeId: string, matchId: stri
   if (!match) {
     throw new AppError({ status: 404, code: 'battle_not_found', message: 'Battle not found.' });
   }
-  if (match.round_status !== 'judging') {
+  const isChallengeTournament = match.tournament_id === CHALLENGE_TOURNAMENT_ID;
+  if (!isChallengeTournament && match.round_status !== 'judging') {
     throw new AppError({ status: 400, code: 'assignment_not_allowed', message: 'Round is not accepting manual judging.' });
   }
-  const { rows: judgeRows } = await pool.query(
-    `SELECT 1
-     FROM tournament_judge
-     WHERE tournament_id = $1 AND user_id = $2
-     LIMIT 1`,
-    [match.tournament_id, judgeId]
-  );
-  if (!judgeRows[0]) {
-    throw new AppError({ status: 403, code: 'not_authorized', message: 'Вы не назначены судьёй в этом турнире.' });
+  if (!isChallengeTournament) {
+    const { rows: judgeRows } = await pool.query(
+      `SELECT 1
+       FROM tournament_judge
+       WHERE tournament_id = $1 AND user_id = $2
+       LIMIT 1`,
+      [match.tournament_id, judgeId]
+    );
+    if (!judgeRows[0]) {
+      throw new AppError({ status: 403, code: 'not_authorized', message: 'Вы не назначены судьёй в этом турнире.' });
+    }
   }
   const now = Date.now();
   if (match.judging_deadline_at && now > new Date(match.judging_deadline_at).getTime()) {
