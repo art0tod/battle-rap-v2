@@ -70,6 +70,24 @@ export const fetchBattleTracks = async (id: string) =>
     next: { revalidate: 10 },
   });
 
+export const likeTrack = async (token: string, matchTrackId: string) =>
+  apiFetch(`/engagement/likes`, {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${token}`,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ match_track_id: matchTrackId }),
+  });
+
+export const unlikeTrack = async (token: string, matchTrackId: string) =>
+  apiFetch(`/engagement/likes/${matchTrackId}`, {
+    method: "DELETE",
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+
 export const fetchArtists = async (params?: {
   page?: number;
   limit?: number;
@@ -217,6 +235,16 @@ export const fetchJudgeAssignments = async (token: string) =>
       Authorization: `Bearer ${token}`,
     },
   });
+
+export const fetchJudgeAvailableBattles = async (token: string, limit = 20) =>
+  apiFetch<Array<{ match_id: string; match_status: string; starts_at: string | null; tournament_title: string; round_number: number; round_kind: string }>>(
+    withQuery("/judge/battles/available", { limit }),
+    {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    }
+  );
 
 export const requestRandomJudgeAssignment = async (token: string) =>
   apiFetch<JudgeAssignment | null>("/judge/assignments/random", {

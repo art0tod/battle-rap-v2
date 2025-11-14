@@ -4,6 +4,7 @@ import { fetchBattleDetail, fetchBattleTracks, fetchRoundOverview } from "@/lib/
 import { formatDateTime, formatDuration, formatNumber } from "@/lib/format";
 import { formatMatchStatus } from "@/lib/labels";
 import { isUuid } from "@/lib/validation";
+import JudgeBattlePanel from "@/components/judge-battle-panel";
 
 const loadBattle = async (id: string) => {
   try {
@@ -152,6 +153,10 @@ export default async function BattlePage({ params }: BattlePageProps) {
         ) : (
           <p>Треки еще не загружены.</p>
         )}
+      </section>
+      <section>
+        <h3>Судейская панель</h3>
+        <JudgeBattlePanel matchId={battle.id} />
       </section>
     </div>
   );

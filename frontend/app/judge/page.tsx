@@ -5,6 +5,7 @@ import { useAuth } from "@/context/auth-context";
 import {
   assignJudgeBattle,
   fetchJudgeAssignments,
+  fetchJudgeAvailableBattles,
   fetchJudgeBattleDetails,
   fetchJudgeHistory,
   requestRandomJudgeAssignment,
@@ -20,6 +21,9 @@ export default function JudgeDashboard() {
   const isJudge = Boolean(user && user.roles.includes("judge"));
   const [assignments, setAssignments] = useState<JudgeAssignment[]>([]);
   const [history, setHistory] = useState<JudgeHistoryEntry[]>([]);
+  const [availableBattles, setAvailableBattles] = useState<
+    Array<{ match_id: string; match_status: string; starts_at: string | null; tournament_title: string; round_number: number; round_kind: string }>
+  >([]);
   const [activeBattle, setActiveBattle] = useState<JudgeBattleDetails | null>(null);
   const [manualMatchId, setManualMatchId] = useState("");
   const [statusMessage, setStatusMessage] = useState<string | null>(null);
@@ -38,6 +42,8 @@ export default function JudgeDashboard() {
       const [assignmentsData, historyData] = await Promise.all([fetchJudgeAssignments(token), fetchJudgeHistory(token)]);
       setAssignments(assignmentsData ?? []);
       setHistory(historyData ?? []);
+      const available = await fetchJudgeAvailableBattles(token, 20);
+      setAvailableBattles(available ?? []);
     } catch (err) {
       setStatusMessage(err instanceof Error ? err.message : "Не удалось загрузить судейские данные");
     } finally {
@@ -88,6 +94,7 @@ export default function JudgeDashboard() {
         setStatusMessage("Нет доступных баттлов для назначения.");
       } else {
         setStatusMessage(`Назначен баттл ${assignment.match_id}`);
+        await openBattle(assignment.match_id);
       }
       await loadData();
     } catch (err) {
@@ -191,6 +198,39 @@ export default function JudgeDashboard() {
           </ul>
         ) : (
           <p>Нет активных назначений.</p>
+        )}
+      </section>
+      <section>
+        <h3>Доступные баттлы</h3>
+        {availableBattles.length ? (
+          <ul>
+            {availableBattles.map((battle) => (
+              <li key={battle.match_id}>
+                {battle.tournament_title}: раунд {battle.round_number} ({battle.round_kind}) — {formatMatchStatus(battle.match_status)}
+                <button type="button" onClick={() => openBattle(battle.match_id)}>
+                  Просмотреть
+                </button>
+                <button
+                  type="button"
+                  onClick={async () => {
+                    if (!token) return;
+                    try {
+                      await assignJudgeBattle(token, battle.match_id);
+                      setStatusMessage(`Баттл ${battle.match_id} назначен`);
+                      await loadData();
+                      await openBattle(battle.match_id);
+                    } catch (err) {
+                      setStatusMessage(err instanceof Error ? err.message : "Не удалось назначить баттл");
+                    }
+                  }}
+                >
+                  Взять на оценку
+                </button>
+              </li>
+            ))}
+          </ul>
+        ) : (
+          <p>Нет открытых баттлов, соответствующих вашей роли.</p>
         )}
       </section>
       <section>
