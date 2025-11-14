@@ -1,0 +1,98 @@
+services:
+  postgres:
+    image: postgres:16
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: battle_rap
+      POSTGRES_USER: app
+      POSTGRES_PASSWORD: adminadmin
+    ports:
+      - "15432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  redis:
+    image: redis:7-alpine
+    restart: unless-stopped
+    ports:
+      - "16379:6379"
+    volumes:
+      - redis_data:/data
+
+  minio:
+    image: minio/minio:latest
+    restart: unless-stopped
+    environment:
+      MINIO_ROOT_USER: minio
+      MINIO_ROOT_PASSWORD: minio123
+    command: server /data --console-address ":9001"
+    ports:
+      - "19000:9000"
+      - "19001:9001"
+    volumes:
+      - minio_data:/data
+  api:
+    build:
+      context: ./backend
+    command: pnpm dev
+    depends_on:
+      - postgres
+      - redis
+      - minio
+    environment:
+      HOST: 0.0.0.0
+      NODE_ENV: development
+      DATABASE_URL: postgres://app:adminadmin@postgres:5432/battle_rap
+      REDIS_URL: redis://redis:6379
+      JWT_SECRET: supersecretsecret123
+      JWT_ACCESS_TTL: 900s
+      JWT_REFRESH_TTL: 7d
+      S3_ENDPOINT: http://minio:9000
+      S3_BUCKET: test
+      S3_ACCESS_KEY: minio
+      S3_SECRET_KEY: minio123
+      S3_REGION: us-east-1
+      CDN_BASE_URL: http://localhost:19000
+      PORT: 3000
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./backend:/app
+      - backend-node_modules:/app/node_modules
+    working_dir: /app
+    restart: unless-stopped
+  front:
+    build:
+      context: ./frontend
+    command: pnpm dev
+    depends_on:
+      - api
+    environment:
+      HOST: 0.0.0.0
+      NEXT_PUBLIC_INTERNAL_API_BASE_URL: http://localhost:3000/api/v1
+      BATTLE_RAP_API_BASE_URL: http://api:3000
+      NEXT_PUBLIC_MEDIA_BASE_URL: http://localhost:19000
+      PORT: 3001
+    ports:
+      - "3001:3001"
+    volumes:
+      - ./frontend:/app
+      - frontend-node_modules:/app/node_modules
+    working_dir: /app
+    restart: unless-stopped
+  adminer:
+    image: adminer:latest
+    restart: unless-stopped
+    depends_on:
+      - postgres
+    environment:
+      ADMINER_DEFAULT_SERVER: postgres
+    ports:
+      - "8080:8080"
+
+volumes:
+  postgres_data:
+  redis_data:
+  minio_data:
+  backend-node_modules:
+  frontend-node_modules:
