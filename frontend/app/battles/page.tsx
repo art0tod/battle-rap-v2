@@ -4,7 +4,7 @@ import { formatDateTime } from "@/lib/format";
 import { formatMatchStatus } from "@/lib/labels";
 
 type PageProps = {
-  searchParams?: Record<string, string | string[] | undefined>;
+  searchParams?: Promise<Record<string, string | string[] | undefined>>;
 };
 
 const STATUS_OPTIONS = [
@@ -13,8 +13,9 @@ const STATUS_OPTIONS = [
   { value: "finished", label: "Завершенные" },
 ];
 
-export default async function BattlesPage({ searchParams = {} }: PageProps) {
-  const statusParam = typeof searchParams.status === "string" ? searchParams.status : undefined;
+export default async function BattlesPage({ searchParams }: PageProps) {
+  const resolvedParams = (await searchParams) ?? {};
+  const statusParam = typeof resolvedParams.status === "string" ? resolvedParams.status : undefined;
   const { battles } = await fetchBattles({ status: statusParam as "current" | "finished" | undefined });
 
   return (

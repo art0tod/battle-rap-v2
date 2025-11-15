@@ -1,4 +1,4 @@
-import type { NextFetchRequestConfig } from "next/dist/server/web/spec-extension/request";
+import type { RequestInit as NextRequestInit } from "next/dist/server/web/spec-extension/request";
 
 export const API_PREFIX = "/api/v1";
 const DEFAULT_SERVER_BASE = process.env.BATTLE_RAP_API_BASE_URL ?? "http://localhost:3000";
@@ -68,7 +68,7 @@ const resolveRuntimeBase = () => {
   return clientBase;
 };
 
-export type ApiFetchOptions = RequestInit & { next?: NextFetchRequestConfig };
+export type ApiFetchOptions = RequestInit & NextRequestInit;
 
 export async function apiFetch<TResponse>(path: string, init?: ApiFetchOptions): Promise<TResponse> {
   const normalizedPath = path.startsWith("/") ? path : `/${path}`;

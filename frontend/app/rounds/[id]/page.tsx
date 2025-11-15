@@ -35,9 +35,10 @@ export default async function RoundPage({ params, searchParams }: PageProps) {
   const summary = overview?.summary;
 
   const matches = overview?.matches ?? detail.matches;
-  type OverviewParticipant = RoundOverviewResponse["matches"][number]["participants"][number];
+  type OverviewParticipant = RoundOverviewResponse["matches"][number]["participants"][number] & {
+    match_id?: string;
+  };
   const participantMap = new Map<string, OverviewParticipant>();
-  type OverviewParticipant = RoundOverviewResponse["matches"][number]["participants"][number];
   (overview?.matches ?? []).forEach((match) => {
     match.participants.forEach((participant) => {
       if (participant.user_id) {
