@@ -1,14 +1,21 @@
 import { notFound } from "next/navigation";
 import type { ApiError } from "@/lib/api";
-import { fetchBattleDetail, fetchBattleTracks, fetchRoundOverview } from "@/lib/data";
+import {
+  fetchBattleDetail,
+  fetchBattleTracks,
+  fetchRoundOverview,
+} from "@/lib/data";
 import { formatDateTime, formatDuration, formatNumber } from "@/lib/format";
 import { formatMatchStatus } from "@/lib/labels";
 import { isUuid } from "@/lib/validation";
-import JudgeBattlePanel from "@/components/judge-battle-panel";
+// import JudgeBattlePanel from "@/components/judge-battle-panel";
 
 const loadBattle = async (id: string) => {
   try {
-    const [battle, tracks] = await Promise.all([fetchBattleDetail(id), fetchBattleTracks(id)]);
+    const [battle, tracks] = await Promise.all([
+      fetchBattleDetail(id),
+      fetchBattleTracks(id),
+    ]);
     let participants: Array<{
       participant_id: string;
       display_name?: string;
@@ -49,7 +56,9 @@ export default async function BattlePage({ params }: BattlePageProps) {
     notFound();
   }
   const { battle, tracks, participants } = await loadBattle(id);
-  const trackMap = new Map(tracks.tracks.map((track) => [track.participant_id, track]));
+  const trackMap = new Map(
+    tracks.tracks.map((track) => [track.participant_id, track])
+  );
   const mergedParticipants = (() => {
     const baseList = participants.length
       ? participants
@@ -106,7 +115,9 @@ export default async function BattlePage({ params }: BattlePageProps) {
             <tbody>
               {mergedParticipants.map((participant) => (
                 <tr key={participant.participant_id}>
-                  <td>{participant.display_name ?? participant.participant_id}</td>
+                  <td>
+                    {participant.display_name ?? participant.participant_id}
+                  </td>
                   <td>{participant.result_status ?? "—"}</td>
                   <td>{formatNumber(participant.avg_total_score)}</td>
                   <td>
@@ -115,8 +126,14 @@ export default async function BattlePage({ params }: BattlePageProps) {
                         <audio controls src={participant.track.audio_url}>
                           Ваш браузер не поддерживает аудио тег.
                         </audio>
-                        <p>Загружено: {formatDateTime(participant.track.submitted_at)}</p>
-                        <p>Длительность: {formatDuration(participant.track.duration_sec)}</p>
+                        <p>
+                          Загружено:{" "}
+                          {formatDateTime(participant.track.submitted_at)}
+                        </p>
+                        <p>
+                          Длительность:{" "}
+                          {formatDuration(participant.track.duration_sec)}
+                        </p>
                       </div>
                     ) : (
                       <span>Трек не загружен</span>
@@ -156,7 +173,7 @@ export default async function BattlePage({ params }: BattlePageProps) {
       </section>
       <section>
         <h3>Судейская панель</h3>
-        <JudgeBattlePanel matchId={battle.id} />
+        {/* <JudgeBattlePanel matchId={battle.id} /> */}
       </section>
     </div>
   );

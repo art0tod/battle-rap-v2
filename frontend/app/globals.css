@@ -1,30 +1,38 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
 :root {
-  --surface: #f4f5f7;
-  --card: #ffffff;
-  --border: #d6d9e3;
-  --muted: #5a616e;
-  --text: #0f172a;
-  --accent: #1f75a6;
-  --accent-strong: #032a4f;
-  font-family: "Inter", "Segoe UI", system-ui, -apple-system, sans-serif;
-  line-height: 1.6;
+  --background: 0 0% 0%;
+  --foreground: 38 32% 92%;
+  --card: 0 0% 6%;
+  --card-foreground: 38 32% 92%;
+  --popover: 0 0% 4%;
+  --popover-foreground: 38 32% 92%;
+  --primary: 32 96% 55%;
+  --primary-foreground: 28 60% 12%;
+  --secondary: 28 16% 15%;
+  --secondary-foreground: 38 32% 92%;
+  --muted: 32 12% 32%;
+  --muted-foreground: 36 16% 74%;
+  --accent: 34 94% 60%;
+  --accent-foreground: 28 60% 12%;
+  --destructive: 7 84% 54%;
+  --destructive-foreground: 38 32% 92%;
+  --border: 0 0% 12%;
+  --input: 0 0% 12%;
+  --ring: 32 96% 55%;
+  --radius: 1.5rem;
 }
 
-*,
-*::before,
-*::after {
-  box-sizing: border-box;
-}
+@layer base {
+  * {
+    @apply border-border;
+  }
 
-.site-body {
-  background-color: var(--surface);
-  color: var(--text);
-}
-
-body {
-  margin: 0;
-  min-height: 100vh;
-  background-color: var(--surface);
-  color: var(--text);
-  font-family: inherit;
+  body {
+    @apply bg-background text-foreground antialiased;
+    font-family: "Inter", "Segoe UI", system-ui, -apple-system, sans-serif;
+    min-height: 100vh;
+  }
 }

@@ -1,8 +1,9 @@
 "use client";
 
-import type { ReactNode } from "react";
+import type { PropsWithChildren } from "react";
+
 import { AuthProvider } from "@/context/auth-context";
 
-export const AppProviders = ({ children }: { children: ReactNode }) => {
+export function AppProviders({ children }: PropsWithChildren) {
   return <AuthProvider>{children}</AuthProvider>;
-};
+}
