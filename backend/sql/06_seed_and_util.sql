@@ -7,7 +7,7 @@ BEGIN
   SELECT EXISTS (SELECT 1 FROM app_user_role WHERE role='admin') INTO v_admin_exists;
   IF NOT v_admin_exists THEN
     INSERT INTO app_user (email, password_hash, display_name)
-    VALUES ('admin@example.com', '$2b$12$REPLACE_WITH_BCRYPT', 'Admin')
+    VALUES ('admin@example.com', '$2b$12$Bf0x1mocCaX0Fm4aNPd0Iu8wMJUj1/Mla02CkNEbE/yGA6J8EpYKi', 'Admin')
     ON CONFLICT DO NOTHING;
 
     INSERT INTO app_user_role(user_id, role)
@@ -99,25 +99,25 @@ BEGIN
   SELECT id INTO v_admin FROM app_user WHERE email_norm = 'admin@example.com';
 
   INSERT INTO app_user(email, password_hash, display_name)
-  VALUES ('moderator@example.com', '$2b$12$REPLACE_WITH_BCRYPT', 'Moderator Max')
+  VALUES ('moderator@example.com', '$2b$12$Bf0x1mocCaX0Fm4aNPd0Iu8wMJUj1/Mla02CkNEbE/yGA6J8EpYKi', 'Moderator Max')
   ON CONFLICT (email_norm) DO NOTHING;
   INSERT INTO app_user(email, password_hash, display_name)
-  VALUES ('judge@example.com', '$2b$12$REPLACE_WITH_BCRYPT', 'Judge Judy')
+  VALUES ('judge@example.com', '$2b$12$Bf0x1mocCaX0Fm4aNPd0Iu8wMJUj1/Mla02CkNEbE/yGA6J8EpYKi', 'Judge Judy')
   ON CONFLICT (email_norm) DO NOTHING;
   INSERT INTO app_user(email, password_hash, display_name)
-  VALUES ('artist@example.com', '$2b$12$REPLACE_WITH_BCRYPT', 'MC Sample')
+  VALUES ('artist@example.com', '$2b$12$Bf0x1mocCaX0Fm4aNPd0Iu8wMJUj1/Mla02CkNEbE/yGA6J8EpYKi', 'MC Sample')
   ON CONFLICT (email_norm) DO NOTHING;
   INSERT INTO app_user(email, password_hash, display_name)
-  VALUES ('artist2@example.com', '$2b$12$REPLACE_WITH_BCRYPT', 'Flow Master')
+  VALUES ('artist2@example.com', '$2b$12$Bf0x1mocCaX0Fm4aNPd0Iu8wMJUj1/Mla02CkNEbE/yGA6J8EpYKi', 'Flow Master')
   ON CONFLICT (email_norm) DO NOTHING;
   INSERT INTO app_user(email, password_hash, display_name)
-  VALUES ('artist3@example.com', '$2b$12$REPLACE_WITH_BCRYPT', 'Nova Pulse')
+  VALUES ('artist3@example.com', '$2b$12$Bf0x1mocCaX0Fm4aNPd0Iu8wMJUj1/Mla02CkNEbE/yGA6J8EpYKi', 'Nova Pulse')
   ON CONFLICT (email_norm) DO NOTHING;
   INSERT INTO app_user(email, password_hash, display_name)
-  VALUES ('artist4@example.com', '$2b$12$REPLACE_WITH_BCRYPT', 'Rhythm Ranger')
+  VALUES ('artist4@example.com', '$2b$12$Bf0x1mocCaX0Fm4aNPd0Iu8wMJUj1/Mla02CkNEbE/yGA6J8EpYKi', 'Rhythm Ranger')
   ON CONFLICT (email_norm) DO NOTHING;
   INSERT INTO app_user(email, password_hash, display_name)
-  VALUES ('listener@example.com', '$2b$12$REPLACE_WITH_BCRYPT', 'Fan Tony')
+  VALUES ('listener@example.com', '$2b$12$Bf0x1mocCaX0Fm4aNPd0Iu8wMJUj1/Mla02CkNEbE/yGA6J8EpYKi', 'Fan Tony')
   ON CONFLICT (email_norm) DO NOTHING;
 
   SELECT id INTO v_moderator FROM app_user WHERE email_norm = 'moderator@example.com';
