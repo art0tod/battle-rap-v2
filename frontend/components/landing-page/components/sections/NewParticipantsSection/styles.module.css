@@ -1,0 +1,145 @@
+.root {
+  padding-block-start: 12rem;
+  padding-block-end: 6rem;
+}
+
+.content {
+  display: flex;
+  flex-direction: column;
+  gap: 101px;
+}
+
+.titleRow {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 2rem;
+  flex-wrap: wrap;
+}
+
+.title {
+  font-weight: 700;
+  font-size: 48px;
+  line-height: 1.1;
+  letter-spacing: -0.05em;
+  text-transform: uppercase;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.titleText {
+  display: block;
+}
+
+.titleLine {
+  display: block;
+  width: 291px;
+  height: 1px;
+  background-color: #fff;
+  flex-shrink: 0;
+}
+
+.carousel {
+  display: flex;
+  gap: 2.5rem;
+  overflow-x: auto;
+  padding-block: 1rem;
+  scroll-snap-type: x mandatory;
+  scrollbar-width: none;
+  scroll-behavior: smooth;
+}
+
+.carousel::-webkit-scrollbar {
+  display: none;
+}
+
+.card {
+  width: 501px;
+  min-width: 501px;
+  height: 667px;
+  border-radius: 10px;
+  border: 1px solid #fff;
+  padding: 2.5rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  gap: 10px;
+  scroll-snap-align: start;
+  background-size: cover;
+  background-position: center;
+  position: relative;
+  overflow: hidden;
+  color: #fff;
+}
+
+.card::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, rgba(0, 0, 0, 0) 40%, rgba(0, 0, 0, 1) 100%);
+  pointer-events: none;
+}
+
+.cardTag {
+  position: relative;
+  font-weight: 700;
+  font-size: 1rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  opacity: 0.85;
+}
+
+.cardName {
+  position: relative;
+  font-weight: 900;
+  font-size: 3rem;
+  text-transform: uppercase;
+}
+
+.cardNameLink {
+  color: inherit;
+  text-decoration: none;
+  transition: color 0.2s ease;
+}
+
+.cardNameLink:hover,
+.cardNameLink:focus-visible {
+  color: #ff9500;
+  outline: none;
+}
+
+.cardButton {
+  position: relative;
+  align-self: flex-start;
+  width: 159px;
+  height: 59px;
+  background: linear-gradient(98.67deg, #ff9500 13.13%, #ff5900 152.73%);
+  border-radius: 10px;
+  border: none;
+  font-weight: 600;
+  font-size: 15px;
+  cursor: pointer;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  color: #fff;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  text-transform: none;
+  box-shadow: 0 0 16px rgba(255, 149, 0, 0.3);
+}
+
+.cardButton:hover {
+  transform: none;
+  box-shadow: 0 0 28px rgba(255, 149, 0, 0.5);
+}
+
+.cardButton:focus-visible {
+  outline: none;
+  box-shadow: 0 0 28px rgba(255, 149, 0, 0.5);
+}
+
+.cardButton[aria-disabled="true"] {
+  opacity: 0.6;
+  pointer-events: none;
+}

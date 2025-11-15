@@ -1,0 +1,51 @@
+.root {
+  position: fixed;
+  right: clamp(1.5rem, 4vw, 3rem);
+  bottom: clamp(1.5rem, 4vw, 3rem);
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  border: none;
+  background: linear-gradient(98.67deg, #ff9500 13.13%, #ff5900 152.73%);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: transform 0.2s ease, opacity 0.3s ease;
+  z-index: 6;
+  color: #fff;
+  opacity: 0;
+  transform: translateY(8px);
+  pointer-events: none;
+}
+
+.visible {
+  opacity: 1;
+  transform: translateY(0);
+  pointer-events: auto;
+}
+
+.root:hover,
+.root:focus-visible {
+  transform: translateY(-4px);
+  outline: none;
+}
+
+.icon {
+  display: block;
+  width: 28px;
+  height: 28px;
+  fill: currentColor;
+}
+
+@media (max-width: 768px) {
+  .root {
+    width: 52px;
+    height: 52px;
+  }
+
+  .icon {
+    width: 20px;
+    height: 20px;
+  }
+}

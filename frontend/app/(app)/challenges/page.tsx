@@ -1,6 +1,7 @@
 "use client";
 
-import { useCallback, useEffect, useState, type FormEvent } from "react";
+import { useCallback, useEffect, useMemo, useState, type FormEvent } from "react";
+import { useSearchParams } from "next/navigation";
 import { useAuth } from "@/context/auth-context";
 import { fetchArtists, fetchChallenges, submitChallengeResponseRequest } from "@/lib/data";
 import { apiFetch, ApiError } from "@/lib/api";
@@ -9,14 +10,17 @@ import { formatChallengeStatus } from "@/lib/labels";
 import type { Challenge, ChallengeResponse, ParticipantSummary } from "@/lib/types";
 import { uploadAudioFile } from "@/lib/uploads";
 
+type OpponentCandidate = Pick<ParticipantSummary, "id" | "display_name"> & Partial<ParticipantSummary>;
+
 export default function ChallengesPage() {
   const { user, token } = useAuth();
+  const searchParams = useSearchParams();
   const [challenges, setChallenges] = useState<Challenge[]>([]);
   const [loading, setLoading] = useState(true);
   const [actionMessage, setActionMessage] = useState<string | null>(null);
   const [opponentSearch, setOpponentSearch] = useState("");
   const [searchResults, setSearchResults] = useState<ParticipantSummary[]>([]);
-  const [selectedOpponent, setSelectedOpponent] = useState<ParticipantSummary | null>(null);
+  const [selectedOpponent, setSelectedOpponent] = useState<OpponentCandidate | null>(null);
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [submitting, setSubmitting] = useState(false);
@@ -152,6 +156,29 @@ export default function ChallengesPage() {
       }
     }
   };
+
+  const initialOpponent = useMemo(() => {
+    const opponentId = searchParams.get("opponent");
+    if (!opponentId) return null;
+    const opponentName = searchParams.get("opponentName") ?? "Неизвестный участник";
+    return {
+      id: opponentId,
+      display_name: opponentName,
+      roles: [],
+      city: null,
+      full_name: null,
+      joined_at: "",
+      avatar: null,
+      avg_total_score: null,
+      total_wins: 0,
+    } satisfies OpponentCandidate;
+  }, [searchParams]);
+
+  useEffect(() => {
+    if (!initialOpponent) return;
+    setSelectedOpponent((prev) => (prev?.id === initialOpponent.id ? prev : initialOpponent));
+    setOpponentSearch((prev) => (prev || initialOpponent.display_name));
+  }, [initialOpponent]);
 
   return (
     <div>

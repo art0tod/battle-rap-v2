@@ -1,0 +1,56 @@
+.root {
+  position: fixed;
+  top: 0;
+  width: 100%;
+  backdrop-filter: blur(0) saturate(100%) brightness(100%);
+  transition: backdrop-filter 0.3s;
+  z-index: 5;
+}
+
+.backdropBlur {
+  background-image: linear-gradient(0deg, hsla(0 0% 0% 1), hsla(0 0% 0% 0));
+  backdrop-filter: blur(8px) saturate(110%) brightness(90%);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.content {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 2.2rem 1.2rem;
+
+  font-weight: 700;
+  font-weight: bold;
+  font-size: 1.25rem;
+  text-transform: uppercase;
+  min-height: 160px;
+
+  gap: 3rem;
+  margin: auto;
+}
+
+.navBar {
+  display: flex;
+  gap: 2em;
+}
+
+.links {
+  display: flex;
+  gap: 2em;
+  align-items: center;
+}
+
+.link {
+  transition: opacity 0.2s ease;
+}
+
+.link:hover,
+.link:focus-visible {
+  opacity: 0.75;
+}
+
+.cta {
+  padding: 2rem 4.375rem;
+  border: 1px solid white;
+  border-radius: 10px;
+}

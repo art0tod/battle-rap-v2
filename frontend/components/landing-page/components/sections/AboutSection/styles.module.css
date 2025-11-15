@@ -1,0 +1,58 @@
+.root {
+  padding-block-start: 15rem;
+  display: flex;
+  flex-direction: column;
+  gap: 3.3rem;
+}
+
+.subTitle {
+  font-weight: 900;
+  font-size: 96px;
+  line-height: 117px;
+
+  text-transform: uppercase;
+}
+
+.paragraph {
+  font-weight: 700;
+  font-size: 24px;
+  line-height: 167%;
+  max-width: 1000px;
+  padding-left: 4.5rem;
+}
+
+.contactsIconsList {
+  display: flex;
+  gap: 2rem;
+}
+
+.contactsLink {
+  border: 1px solid white;
+  border-radius: 50%;
+
+  padding: 1.2rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.contactsIconImage {
+  display: block;
+  width: 30px;
+  height: 30px;
+  background-repeat: no-repeat;
+  background-size: contain;
+  background-position: center;
+}
+
+.visuallyHidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}

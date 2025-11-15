@@ -5,7 +5,7 @@ import { fetchProfile, fetchProfileHighlights } from "@/lib/data";
 import { formatDateTime } from "@/lib/format";
 import { formatMatchStatus, formatRoundStatus } from "@/lib/labels";
 import { isUuid } from "@/lib/validation";
-import { ChallengeButton } from "@/components/challenge-button";
+// import { ChallengeButton } from "@/components/challenge-button";
 
 const loadProfile = async (id: string) => {
   try {
@@ -46,12 +46,17 @@ export default async function ProfilePage({ params }: ProfilePageProps) {
           <li>VK: {profile.vk_id ?? "—"}</li>
         </ul>
       ) : null}
-      {!profile.viewer_context.is_self ? (
-        <section>
-          <h3>Вызвать на баттл</h3>
-          <ChallengeButton opponentId={profile.id} opponentName={profile.display_name} />
-        </section>
-      ) : null}
+      {
+        // !profile.viewer_context.is_self ? (
+        //   <section>
+        //     <h3>Вызвать на баттл</h3>
+        //     <ChallengeButton
+        //       opponentId={profile.id}
+        //       opponentName={profile.display_name}
+        //     />
+        //   </section>
+        // ) : null
+      }
       <section>
         <h3>Статистика</h3>
         <ul>
@@ -67,7 +72,9 @@ export default async function ProfilePage({ params }: ProfilePageProps) {
             {highlights.participated_battles.map((battle) => (
               <li key={battle.id}>
                 <p>
-                  {battle.tournament.title}, раунд {battle.round.number} ({battle.round.kind}) — {formatMatchStatus(battle.status)} ({battle.result})
+                  {battle.tournament.title}, раунд {battle.round.number} (
+                  {battle.round.kind}) — {formatMatchStatus(battle.status)} (
+                  {battle.result})
                 </p>
                 <Link href={`/battles/${battle.id}`}>Перейти к баттлу</Link>
               </li>
@@ -84,7 +91,9 @@ export default async function ProfilePage({ params }: ProfilePageProps) {
             {highlights.judged_battles.map((battle) => (
               <li key={battle.id}>
                 <p>
-                  {battle.tournament.title}, раунд {battle.round.number} ({battle.round.kind}) — {formatRoundStatus(battle.round.status)}. Оценено{" "}
+                  {battle.tournament.title}, раунд {battle.round.number} (
+                  {battle.round.kind}) —{" "}
+                  {formatRoundStatus(battle.round.status)}. Оценено{" "}
                   {formatDateTime(battle.evaluated_at)}
                 </p>
                 <Link href={`/battles/${battle.id}`}>Баттл</Link>

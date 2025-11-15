@@ -1,0 +1,302 @@
+.root {
+  padding-block-start: 6rem;
+  padding-block-end: 6rem;
+  scroll-margin-top: 180px;
+}
+
+.content {
+  display: flex;
+  flex-direction: column;
+  gap: 4.5rem;
+}
+
+.titleRow {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 2rem;
+  flex-wrap: wrap;
+}
+
+.title {
+  font-weight: 700;
+  font-size: 48px;
+  line-height: 1.1;
+  letter-spacing: -0.05em;
+  text-transform: uppercase;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.titleText {
+  display: block;
+}
+
+.titleLine {
+  display: block;
+  width: 291px;
+  height: 1px;
+  background-color: #fff;
+  flex-shrink: 0;
+}
+
+.postsGrid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 3rem;
+  align-items: stretch;
+}
+
+
+.postCard {
+  border-radius: 10px;
+  border: 2px solid rgba(255, 255, 255, 0.2);
+  background-color: rgba(255, 255, 255, 0.04);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  width: 100%;
+  min-height: 480px;
+  padding-inline: 80px;
+  padding-block: 1.5rem 2rem;
+  gap: 1.2rem;
+}
+
+.postHeader {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  padding-top: 0.5rem;
+  font-size: 0.95rem;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+.postDate {
+  opacity: 0.7;
+}
+
+.postImage {
+  width: 100%;
+  aspect-ratio: 1 / 1;
+  border-radius: 10px;
+  background-color: rgba(255, 255, 255, 0.08);
+  border: 1px dashed rgba(255, 255, 255, 0.25);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.postImageText {
+  font-size: 0.95rem;
+  text-transform: uppercase;
+  letter-spacing: 0.15em;
+  color: rgba(255, 255, 255, 0.5);
+}
+
+.postContent {
+  display: flex;
+  flex-direction: column;
+  gap: 0.9rem;
+  padding: 0;
+  flex: 1;
+}
+
+.postHighlights {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.45rem;
+}
+
+.postHighlight {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.35rem 0.85rem;
+  border-radius: 10px;
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  font-size: 0.75rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  opacity: 0.75;
+}
+
+.postDescription {
+  position: relative;
+  font-size: 1.25rem;
+  line-height: 1.8;
+  color: rgba(255, 255, 255, 0.88);
+}
+
+.postMeta {
+  display: flex;
+  align-items: center;
+  gap: 1.25rem;
+  margin-top: 1rem;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  width: 100%;
+}
+
+.postViews {
+  font-size: 0.9rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  opacity: 0.75;
+}
+
+.postReactions {
+  display: inline-flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.actionButton {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding-inline: 1.5rem;
+  padding-block: 0.75rem;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.4);
+  background: transparent;
+  color: inherit;
+  font-weight: 600;
+  font-size: 0.95rem;
+  cursor: pointer;
+  transition: color 0.2s ease, border-color 0.2s ease;
+}
+
+.actionButtonIcon {
+  width: 1.25rem;
+  height: 1.25rem;
+}
+
+.actionButton:hover,
+.actionButton:focus-visible {
+  border-color: #ff9500;
+  color: #ff9500;
+}
+
+.actionButtonDislike {
+  border-color: rgba(255, 89, 0, 0.4);
+}
+
+.actionButtonDislike:hover,
+.actionButtonDislike:focus-visible {
+  border-color: #ff5900;
+  color: #ff5900;
+}
+
+.actionButtonActive {
+  border: none;
+  color: #fff;
+  background: linear-gradient(98.67deg, #ff9500 13.13%, #ff5900 152.73%);
+  box-shadow: 0 0 16px rgba(255, 149, 0, 0.35);
+}
+
+.actionButtonDislike.actionButtonActive {
+  background: linear-gradient(140deg, #ff4d00 0%, #ff1f1f 100%);
+  color: #fff;
+  border: none;
+  box-shadow: 0 0 16px rgba(255, 50, 0, 0.35);
+}
+
+.actionButtonActive:hover,
+.actionButtonActive:focus-visible {
+  color: #fff;
+  box-shadow: 0 0 28px rgba(255, 149, 0, 0.55);
+}
+
+.actionButtonDislike.actionButtonActive:hover,
+.actionButtonDislike.actionButtonActive:focus-visible {
+  color: #fff;
+  box-shadow: 0 0 28px rgba(255, 50, 0, 0.55);
+}
+
+.postTag {
+  font-weight: 700;
+  font-size: 0.875rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  opacity: 0.8;
+  position: relative;
+}
+
+.postTitle {
+  font-weight: 800;
+  font-size: 2rem;
+  line-height: 1.1;
+  text-transform: uppercase;
+  position: relative;
+}
+
+.postLink {
+  position: relative;
+  align-self: flex-start;
+  font-weight: 600;
+  font-size: 0.95rem;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  padding-block: 0.5rem;
+  transition: color 0.2s ease;
+}
+
+.postLinkExtraSpacing {
+  margin-bottom: 15px;
+}
+
+.postLink:hover {
+  color: #ff9500;
+}
+
+@media (max-width: 768px) {
+  .root {
+    padding-block-start: 4rem;
+    padding-block-end: 4rem;
+  }
+
+  .postsGrid {
+    grid-template-columns: 1fr;
+    gap: 2.5rem;
+  }
+
+  .title {
+    font-size: 36px;
+  }
+
+  .titleLine {
+    width: 160px;
+  }
+
+  .postCard {
+    border-radius: 16px;
+    height: auto;
+    padding-inline: 1.5rem;
+    padding-block: 1.25rem 1.5rem;
+    gap: 1.1rem;
+  }
+
+  .postContent {
+    padding-block: 1rem;
+  }
+
+  .postMeta {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.75rem;
+    justify-content: flex-start;
+    width: auto;
+  }
+
+  .postHighlights {
+    gap: 0.35rem;
+  }
+
+  .postReactions {
+    width: 100%;
+    justify-content: space-between;
+  }
+}

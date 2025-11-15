@@ -1,0 +1,143 @@
+.root {
+  display: flex;
+  justify-content: center;
+  padding-top: 123px;
+  padding-bottom: 50px;
+}
+
+.footer__container {
+  width: 100%;
+  height: 329px;
+  display: flex;
+  flex-direction: column;
+
+}
+
+.footer__titleContainer {
+  display: flex;
+  flex-direction: column;
+}
+
+.footer__subtitle {
+  font-style: normal;
+  font-weight: 700;
+  font-size: 64px;
+  line-height: 78px;
+  color: black;
+  text-shadow: 1px 1px 0 white, -1px 1px 0 white, 1px -1px 0 white,
+      -1px -1px 0 white;
+}
+
+.footer__title {
+  font-style: normal;
+  font-weight: 700;
+  font-size: 48px;
+  line-height: 35px;
+  color: #FFFFFF;
+}
+
+.footer__paragraph {
+  font-style: normal;
+  font-weight: 400;
+  font-size: 24px;
+  line-height: 29px;
+  color: #FFFFFF;
+  max-width: 558px;
+  margin-top: 20px;
+  margin-bottom: 20px;
+}
+
+.contactsIconsList {
+  display: flex;
+  gap: 2rem;
+}
+
+.contactsLink {
+  border: 1px solid white;
+  border-radius: 50%;
+  padding: 1.2rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.contactsIconImage {
+  display: block;
+  width: 30px;
+  height: 30px;
+  background-repeat: no-repeat;
+  background-size: contain;
+  background-position: center;
+}
+
+.visuallyHidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+.footer__navContainer {
+  height: 100%;
+
+  text-transform: uppercase;
+}
+
+.siteLinks {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  gap: 1.5rem;
+}
+
+.siteLink {
+  font-style: normal;
+  font-weight: 700;
+  font-size: 24px;
+  line-height: 29px;
+  color: #FFFFFF;
+  transition: opacity 0.2s ease;
+}
+
+.siteLink:hover,
+.siteLink:focus-visible {
+  opacity: 0.75;
+}
+
+.cta {
+  padding: 2rem 4.375rem;
+  border: 1px solid white;
+  border-radius: 10px;
+  font-style: normal;
+  font-weight: 700;
+  font-size: 20px;
+  line-height: 24px;
+}
+
+.wrapper {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  width: 100%;
+  align-items: center;
+}
+
+.footer__copyrightContainer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.footer__copyright {
+font-style: normal;
+font-weight: 500;
+font-size: 20px;
+line-height: 24px;
+
+color: rgba(255, 255, 255, 0.34);
+}
